@@ -18,8 +18,24 @@ class AuthService {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Registration failed');
+        // Check if response has JSON content
+        const contentType = response.headers.get('content-type');
+        let errorMessage = 'Registration failed';
+
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.detail || errorData.message || errorMessage;
+          } catch (jsonError) {
+            // If JSON parsing fails, use status text or default message
+            errorMessage = response.statusText || errorMessage;
+          }
+        } else {
+          // If not JSON, use status text
+          errorMessage = response.statusText || errorMessage;
+        }
+
+        throw new Error(errorMessage);
       }
 
       // After successful registration, trigger login to get token
@@ -44,11 +60,33 @@ class AuthService {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Login failed');
+        // Check if response has JSON content
+        const contentType = response.headers.get('content-type');
+        let errorMessage = 'Login failed';
+
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.detail || errorData.message || errorMessage;
+          } catch (jsonError) {
+            // If JSON parsing fails, use status text or default message
+            errorMessage = response.statusText || errorMessage;
+          }
+        } else {
+          // If not JSON, use status text
+          errorMessage = response.statusText || errorMessage;
+        }
+
+        throw new Error(errorMessage);
       }
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        throw new Error('Invalid response format from server');
+      }
+
       const token = data.access_token;
 
       // Store the token and email
