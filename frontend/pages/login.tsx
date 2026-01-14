@@ -40,7 +40,6 @@ export default function Login() {
 
       // Redirect to dashboard on successful login
       router.push('/dashboard');
-      router.refresh(); // Refresh to update auth context
     } catch (err: any) {
       setError(err.message || 'Login failed');
       console.error('Login error:', err);
