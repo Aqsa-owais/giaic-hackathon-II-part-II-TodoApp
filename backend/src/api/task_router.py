@@ -64,12 +64,18 @@ def create_user_task(
             detail="Invalid user ID format"
         )
 
-    # Set the user_id in the task to ensure ownership
-    task_data = task_create.dict()
-    task_data['user_id'] = user_uuid
-    task_with_user = TodoTaskCreate(**task_data)
+    # Create the task object directly with user_id already set
+    db_task = TodoTask(
+        title=task_create.title,
+        description=task_create.description,
+        is_completed=task_create.is_completed,
+        user_id=user_uuid
+    )
 
-    return create_task(task_with_user, session)
+    session.add(db_task)
+    session.commit()
+    session.refresh(db_task)
+    return db_task
 
 
 @task_router.get("/{user_id}/tasks/{id}", response_model=TodoTaskRead)

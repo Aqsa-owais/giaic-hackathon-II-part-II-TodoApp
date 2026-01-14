@@ -7,7 +7,9 @@ import uuid
 
 def create_task(task: TodoTaskCreate, session: Session) -> TodoTask:
     """Create a new task in the database"""
-    db_task = TodoTask.from_orm(task) if hasattr(TodoTask, 'from_orm') else TodoTask(**task.dict())
+    # Create the task using the data from TodoTaskCreate
+    task_data = task.dict()
+    db_task = TodoTask(**task_data)
     session.add(db_task)
     session.commit()
     session.refresh(db_task)

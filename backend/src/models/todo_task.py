@@ -23,8 +23,11 @@ class TodoTaskRead(TodoTaskBase):
     updated_at: datetime
 
 
-class TodoTaskCreate(TodoTaskBase):
-    pass
+class TodoTaskCreate(SQLModel):
+    title: str = Field(min_length=1, max_length=255)
+    description: Optional[str] = Field(default=None)
+    is_completed: bool = Field(default=False)
+    # user_id is provided from the path parameter, not the request body
 
 
 class TodoTaskUpdate(SQLModel):
