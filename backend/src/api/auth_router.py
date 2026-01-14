@@ -69,7 +69,7 @@ def login(user_credentials: UserCreate, session: Session = Depends(get_session))
         )
 
     # Create access token
-    access_token = jwt_auth.create_access_token(user.id)
+    access_token = jwt_auth.create_access_token(str(user.id))
 
     return {
         "access_token": access_token,

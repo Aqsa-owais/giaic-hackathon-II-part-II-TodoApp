@@ -3,7 +3,7 @@ sqlmodel==0.0.26
 psycopg2-binary==2.9.10
 python-jose==3.3.0
 passlib==1.7.4
-bcrypt==4.2.1
+bcrypt==4.0.1
 uvicorn==0.40.0
 pydantic==2.12.5
 pydantic-settings==2.12.0
