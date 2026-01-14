@@ -1,5 +1,5 @@
 // Better Auth service wrapper
-import { signIn, signOut, useSession } from '../mocks/better-auth';
+// Removed mock import as we're using direct API calls
 import { User } from '../utils/types';
 
 class AuthService {
@@ -51,12 +51,30 @@ class AuthService {
       const data = await response.json();
       const token = data.access_token;
 
-      // Store the token
+      // Store the token and email
       localStorage.setItem('access_token', token);
+      localStorage.setItem('user_email', credentials.email);
 
-      // For now, return a minimal user object since we don't have user details endpoint
-      // In a real implementation, you might decode the JWT to get user info
-      return { user: { id: '', email: credentials.email } as User, token: token };
+      // Decode the JWT token to get user ID
+      let userId = '';
+      try {
+        const tokenParts = token.split('.');
+        if (tokenParts.length === 3) {
+          const payload = JSON.parse(atob(tokenParts[1]));
+          userId = payload.sub; // subject claim contains the user ID
+        }
+      } catch (decodeError) {
+        console.error('Error decoding token:', decodeError);
+      }
+
+      // Return the user object with both ID and email
+      return {
+        user: {
+          id: userId,
+          email: credentials.email
+        } as User,
+        token: token
+      };
     } catch (error: any) {
       throw new Error(error.message || 'Login failed');
     }
@@ -66,8 +84,9 @@ class AuthService {
    * Log out the current user
    */
   async logout(): Promise<void> {
-    // Remove the stored token
+    // Remove the stored token and email
     localStorage.removeItem('access_token');
+    localStorage.removeItem('user_email');
   }
 
   /**
@@ -93,15 +112,32 @@ class AuthService {
    * Get the current user's info
    */
   async getCurrentUser(): Promise<User | null> {
-    // Extract user info from stored token or make a call to backend to verify token
-    // For now, return null since user info is typically obtained during login
+    // Extract user info from stored token
     const token = this.getToken();
     if (!token) return null;
 
-    // In a real implementation, you would decode the JWT or call an endpoint
-    // to get user details, but since there's no specific endpoint in the backend,
-    // we'll return null for now
-    return null;
+    // Get email from localStorage
+    const email = localStorage.getItem('user_email') || '';
+
+    try {
+      // Decode the JWT token to get user ID
+      const tokenParts = token.split('.');
+      if (tokenParts.length !== 3) {
+        return null;
+      }
+
+      const payload = JSON.parse(atob(tokenParts[1]));
+      const userId = payload.sub; // subject claim contains the user ID
+
+      // Return a user object with both ID and email
+      return {
+        id: userId,
+        email: email
+      } as User;
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return null;
+    }
   }
 }
 

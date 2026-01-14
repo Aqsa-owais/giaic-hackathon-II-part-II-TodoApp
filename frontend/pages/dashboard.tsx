@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/router';
 import authService from '@/services/authService';
 import TodoList from '@/components/Todo/TodoList';
 import Button from '@/components/UI/Button';
