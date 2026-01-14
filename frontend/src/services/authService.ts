@@ -9,7 +9,7 @@ class AuthService {
   async register(userData: { email: string; password: string }): Promise<{ user: User; token: string }> {
     try {
       // For registration, we'll make a direct API call to our backend
-      const response = await fetch('/api/auth/register', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -22,9 +22,8 @@ class AuthService {
         throw new Error(errorData.message || 'Registration failed');
       }
 
-      // After successful registration, trigger login
-      const loginResult = await this.login(userData);
-      return loginResult;
+      // After successful registration, trigger login to get token
+      return await this.login(userData);
     } catch (error: any) {
       throw new Error(error.message || 'Registration failed');
     }
@@ -35,18 +34,29 @@ class AuthService {
    */
   async login(credentials: { email: string; password: string }): Promise<{ user: User; token: string }> {
     try {
-      const result = await signIn('credentials', {
-        ...credentials,
-        redirect: false,
+      // Make direct API call to backend for login
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(credentials),
       });
 
-      if (result?.error) {
-        throw new Error(result.error);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Login failed');
       }
 
-      // For Better Auth, we don't need to manually manage tokens
-      // Better Auth handles this internally
-      return { user: result?.user || null, token: result?.session?.token || '' };
+      const data = await response.json();
+      const token = data.access_token;
+
+      // Store the token
+      localStorage.setItem('access_token', token);
+
+      // For now, return a minimal user object since we don't have user details endpoint
+      // In a real implementation, you might decode the JWT to get user info
+      return { user: { id: '', email: credentials.email } as User, token: token };
     } catch (error: any) {
       throw new Error(error.message || 'Login failed');
     }
@@ -56,7 +66,8 @@ class AuthService {
    * Log out the current user
    */
   async logout(): Promise<void> {
-    await signOut({ redirect: false });
+    // Remove the stored token
+    localStorage.removeItem('access_token');
   }
 
   /**
@@ -82,17 +93,15 @@ class AuthService {
    * Get the current user's info
    */
   async getCurrentUser(): Promise<User | null> {
-    // With Better Auth, use the useSession hook in components
-    // This is maintained for compatibility
-    try {
-      const response = await fetch('/api/auth/me');
-      if (response.ok) {
-        return await response.json();
-      }
-      return null;
-    } catch (error) {
-      return null;
-    }
+    // Extract user info from stored token or make a call to backend to verify token
+    // For now, return null since user info is typically obtained during login
+    const token = this.getToken();
+    if (!token) return null;
+
+    // In a real implementation, you would decode the JWT or call an endpoint
+    // to get user details, but since there's no specific endpoint in the backend,
+    // we'll return null for now
+    return null;
   }
 }
 

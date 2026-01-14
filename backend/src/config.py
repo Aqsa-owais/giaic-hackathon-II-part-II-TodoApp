@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     jwt_access_token_expire_minutes: int = 60 * 24 * 7  # 7 days
 
     # CORS settings
-    allowed_origins: List[str] = Field(default=["http://localhost:3000"])
+    allowed_origins: List[str] = Field(default=["http://localhost:3000", "http://localhost:3001"])
 
     model_config = {
         "env_file": ".env",

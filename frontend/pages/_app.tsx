@@ -1,7 +1,7 @@
 import '../styles/globals.css';
 import type { AppProps } from 'next/app';
-import { AuthProvider } from '../src/context/AuthProvider';
-import { BetterAuthProvider } from '../src/mocks/better-auth';
+import { AuthProvider } from '@/context/AuthProvider';
+import { BetterAuthProvider } from '@/mocks/better-auth';
 
 export default function App({ Component, pageProps }: AppProps) {
   return (

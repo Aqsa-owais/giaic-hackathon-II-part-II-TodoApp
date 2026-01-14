@@ -12,7 +12,7 @@
     "axios": "^1.6.0",
     "better-auth": "^0.0.1-beta.15",
     "jose": "^5.1.0",
-    "next": "16.0.0-canary.0",
+    "next": "^14.2.25",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
@@ -22,7 +22,7 @@
     "@types/react-dom": "^18.2.18",
     "autoprefixer": "^10.4.16",
     "eslint": "^8.55.0",
-    "eslint-config-next": "16.0.0-canary.0",
+    "eslint-config-next": "^14.2.22",
     "postcss": "^8.4.32",
     "tailwindcss": "^3.3.6",
     "typescript": "^5.3.0"
