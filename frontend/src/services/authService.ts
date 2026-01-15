@@ -10,11 +10,26 @@ class AuthService {
     try {
       console.log('Attempting registration with API URL:', process.env.NEXT_PUBLIC_API_URL);
 
+      // First, let's check if the backend is reachable
+      try {
+        const testResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/health`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        console.log('Health check response:', testResponse.status, await testResponse.text().catch(() => 'unable to read'));
+      } catch (healthError) {
+        console.error('Health check failed:', healthError);
+        throw new Error('Cannot connect to the authentication server. Please contact support.');
+      }
+
       // For registration, we'll make a direct API call to our backend
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
         body: JSON.stringify(userData),
       });
@@ -50,10 +65,16 @@ class AuthService {
       return await this.login(userData);
     } catch (error: any) {
       console.error('Full registration error:', error);
+
+      // Provide more specific error messages based on the error type
       if (error.message.includes('Failed to fetch')) {
-        throw new Error('Unable to connect to the server. Please check your internet connection and try again.');
+        return Promise.reject(new Error('Unable to connect to the authentication server. The server may be temporarily unavailable.'));
       }
-      throw new Error(error.message || 'Registration failed');
+      if (error.message.includes('NetworkError')) {
+        return Promise.reject(new Error('Network error occurred while connecting to the authentication server.'));
+      }
+
+      return Promise.reject(new Error(error.message || 'Registration failed'));
     }
   }
 
@@ -69,6 +90,7 @@ class AuthService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
         body: JSON.stringify(credentials),
       });
@@ -133,10 +155,15 @@ class AuthService {
       };
     } catch (error: any) {
       console.error('Full login error:', error);
+
       if (error.message.includes('Failed to fetch')) {
-        throw new Error('Unable to connect to the server. Please check your internet connection and try again.');
+        return Promise.reject(new Error('Unable to connect to the authentication server. The server may be temporarily unavailable.'));
       }
-      throw new Error(error.message || 'Login failed');
+      if (error.message.includes('NetworkError')) {
+        return Promise.reject(new Error('Network error occurred while connecting to the authentication server.'));
+      }
+
+      return Promise.reject(new Error(error.message || 'Login failed'));
     }
   }
 
