@@ -94,7 +94,8 @@ npm run dev
 ### Backend
 - `DATABASE_URL`: PostgreSQL connection string
 - `BETTER_AUTH_SECRET`: JWT signing secret (must be at least 32 characters)
-- `FRONTEND_URL`: Allowed origin for CORS
+- `FRONTEND_URL`: Primary allowed origin for CORS
+- `ALLOWED_ORIGINS_RAW`: Comma-separated list of allowed origins for CORS (defaults to localhost if not set)
 
 ### Frontend
 - `NEXT_PUBLIC_API_URL`: URL of the backend API
@@ -157,6 +158,7 @@ Ensure your backend environment variables are set:
 - `DATABASE_URL`: PostgreSQL connection string
 - `BETTER_AUTH_SECRET`: JWT signing secret (at least 32 characters)
 - `FRONTEND_URL`: Your deployed frontend URL for CORS
+- `ALLOWED_ORIGINS_RAW`: Comma-separated list of allowed origins for CORS (e.g., "https://your-frontend.vercel.app,http://localhost:3000")
 
 ### Common Deployment Issues
 
