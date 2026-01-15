@@ -8,11 +8,18 @@ class AuthService {
    */
   async register(userData: { email: string; password: string }): Promise<{ user: User; token: string }> {
     try {
-      console.log('Attempting registration with API URL:', process.env.NEXT_PUBLIC_API_URL);
+      // Validate that the API URL is properly configured
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+      if (!apiUrl) {
+        throw new Error('API URL is not configured. Please contact support.');
+      }
+
+      console.log('Attempting registration with API URL:', apiUrl);
 
       // First, let's check if the backend is reachable
       try {
-        const testResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/health`, {
+        const testResponse = await fetch(`${apiUrl}/health`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -25,7 +32,7 @@ class AuthService {
       }
 
       // For registration, we'll make a direct API call to our backend
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/register`, {
+      const response = await fetch(`${apiUrl}/api/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -68,10 +75,13 @@ class AuthService {
 
       // Provide more specific error messages based on the error type
       if (error.message.includes('Failed to fetch')) {
-        return Promise.reject(new Error('Unable to connect to the authentication server. The server may be temporarily unavailable.'));
+        return Promise.reject(new Error('Unable to connect to the authentication server. This may be due to network issues or the server being temporarily unavailable.'));
       }
       if (error.message.includes('NetworkError')) {
         return Promise.reject(new Error('Network error occurred while connecting to the authentication server.'));
+      }
+      if (error.message.includes('TypeError') && error.message.includes('fetch')) {
+        return Promise.reject(new Error('Connection error: Cannot reach the authentication server. This may be due to CORS policy or network restrictions.'));
       }
 
       return Promise.reject(new Error(error.message || 'Registration failed'));
@@ -83,10 +93,17 @@ class AuthService {
    */
   async login(credentials: { email: string; password: string }): Promise<{ user: User; token: string }> {
     try {
-      console.log('Attempting login with API URL:', process.env.NEXT_PUBLIC_API_URL);
+      // Validate that the API URL is properly configured
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+      if (!apiUrl) {
+        throw new Error('API URL is not configured. Please contact support.');
+      }
+
+      console.log('Attempting login with API URL:', apiUrl);
 
       // Make direct API call to backend for login
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/login`, {
+      const response = await fetch(`${apiUrl}/api/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -157,10 +174,13 @@ class AuthService {
       console.error('Full login error:', error);
 
       if (error.message.includes('Failed to fetch')) {
-        return Promise.reject(new Error('Unable to connect to the authentication server. The server may be temporarily unavailable.'));
+        return Promise.reject(new Error('Unable to connect to the authentication server. This may be due to network issues or the server being temporarily unavailable.'));
       }
       if (error.message.includes('NetworkError')) {
         return Promise.reject(new Error('Network error occurred while connecting to the authentication server.'));
+      }
+      if (error.message.includes('TypeError') && error.message.includes('fetch')) {
+        return Promise.reject(new Error('Connection error: Cannot reach the authentication server. This may be due to CORS policy or network restrictions.'));
       }
 
       return Promise.reject(new Error(error.message || 'Login failed'));
